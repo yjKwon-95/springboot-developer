@@ -1,60 +1,47 @@
-# 빋드(CI)
-# 워크플로우의 이름을 CI로 설정
+#워크플로우의 이름을 CI로 설정
 name : CICD
 
-# 워크플로우가 시작될 조건을 지정
-# main 브랜치에 push될때 워크플로우가 실행된다.
-on : 
-  push : 
-    branches : [main]
+#2. 워크플로우가 시작될 조건을 지정
+# main 브랜치에 push될 때 워크플로우가 실행됨
+on:
+  push:
+    branches: [main]
 
-jobs : 
+jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses : actions/checkout@v3
-      - uses : actions/setup-java@v3
-        with : 
-          distribution : 'corretto'
-          java-version : '17'
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
 
-      - name : Grant execute permission for gradlew
-        run : chmod +x gradlew #chmod +x 명령어를 통해 gradlew에 실행권한을 부여한다.
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew #chmod +x 명령어를 통해 gradlew에 실행권한을 부여한다.
 
-      - name : Build with gradle
-        run : ./gradlew clean build #프로젝트를 빌드하는 명령어
+      - name: Build with Gradle
+        run: ./gradlew clean build #프로젝트를 빌드하는 명령어
 
+      - name: Get current time #현재 시간 가져오기
+        uses: josStorer/get-current-time@v2.0.2
+        id: current-time
+        with:
+          format: YYYY-MM-DDTHH-mm-ss
+          utcOffset: "+09:00"
+      
+      - name: Set artifact
+        run: echo "artifact=$(ls ./build/libs)" >> $GITHUB_ENV
 
-
-        # 배포(CD)
-      - name : Get current time #현재시간 가져오기
-        #uses : 만들어 놓은 기능을 사용할때
-        uses : josStorer/get-current-time@v2.0.2  
-        # josStorer/get-current-time@v2.0.2  : 현재시간을 특정형식(YYYY-MM-DDTHH-mm-ss)으로 가져온다.
-        id : current-time
-        # id : current-time : 이 단계의 출력값을 이후 단계에서 steps.currnet-time.outputs.fromattedTime으로 참조할수있게 한다.
-        with : 
-          format : YYYY-MM-DDTHH-mm-ss 
-          utcOffset : "+09:00"
-          # utcOffset : 시간대를 +09:00으로하여 한국 시간 기준으로 시간을 가져온다.
-
-      - name : Set artifact
-        # name : Set artifact : 빌드된 파일을 저장하고 환경변수를 설정하는 단계
-        # 빌드 디렉토리에서 생성된 아티팩트 파일의 이름을 가져와 GitGubActions환경변수로 설정한다.
-        run : echo "artifact=$(ls ./build/libs)" >> $GITHUB_ENV #환경변수
-        # echo : 문자열을 출력하는 명령어
-        # ex ) name='gildong' echo "안녕하세요 $name님"
-        # ls : 디렉터리 안에 있는 파일과 폴더 목록을 보여줌
-        
-
-      - name : Beanstalk Depoly
-        uses : einaregilsson/beanstalk-deploy@v20
-        with :
-          aws_access_key : ${{ secrets.AWS_ACCESS_KEY_ID}}
-          aws_secret_key : ${{ secrets.AWS_SECRET_ACCESS_KEY}}
-          application_name : aws-elasticbeanstalk-ec2-role #elastic beanstalk의 어플리케이션정보 가져오기
-          environment_name : Aws-elasticbeanstalk-ec2-role-env #elastic beanstalk의 환경이름정보 가져오기
-          version_label : github-action-${{steps.current-time.outputs.formattedTime}}         
-          region : ap-northeast-2 #지역정보
-          deployment_pacage : ./build/libs/${{env.artifact}}
+      - name: Beanstalk Deploy
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: springboot-developer
+          environment_name: Springboot-developer-env
+          version_label: github-action-${{steps.current-time.outputs.formattedTime}}
+          region: ap-northeast-2
+          deployment_package: ./build/libs/${{env.artifact}}
+  
