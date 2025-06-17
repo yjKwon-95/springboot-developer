@@ -42,7 +42,7 @@ jobs :
       - name : Set artifact
         # name : Set artifact : 빌드된 파일을 저장하고 환경변수를 설정하는 단계
         # 빌드 디렉토리에서 생성된 아티팩트 파일의 이름을 가져와 GitGubActions환경변수로 설정한다.
-        run : echo "artifact=$(ls .build/libs)" >> $GITHUB_ENV #환경변수
+        run : echo "artifact=$(ls ./build/libs)" >> $GITHUB_ENV #환경변수
         # echo : 문자열을 출력하는 명령어
         # ex ) name='gildong' echo "안녕하세요 $name님"
         # ls : 디렉터리 안에 있는 파일과 폴더 목록을 보여줌
