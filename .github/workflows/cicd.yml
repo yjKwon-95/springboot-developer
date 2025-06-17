@@ -57,4 +57,4 @@ jobs :
           environment_name : Aws-elasticbeanstalk-ec2-role-env #elastic beanstalk의 환경이름정보 가져오기
           version_label : github-action-${{steps.current-time.outputs.formattedTime}}         
           region : ap-northeast-2 #지역정보
-          deployment_pacage : ./build/libs${{env.artifact}}
+          deployment_pacage : ./build/libs/${{env.artifact}}
