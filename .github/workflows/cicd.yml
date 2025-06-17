@@ -39,12 +39,9 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: springboot-developer
+          application_name: aws-elasticbeanstalk-ec2-role
           environment_name: Aws-elasticbeanstalk-ec2-role-env
           version_label: github-action-${{steps.current-time.outputs.formattedTime}}
           region: ap-northeast-2
           deployment_package: ./build/libs/${{env.artifact}}
-          wait_for_deployment: true
-          recovery_wait_time: 60 # 🔁 기존 30초보다 더 늘리기
-
   
